@@ -24,7 +24,7 @@ jobs:
       - name: Prepare public website
         run: |
           mkdir -p site
-          cp index.html admin.html config.js site/
+          cp index.html admin.html config.js favicon.ico site/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
