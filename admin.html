@@ -1,1 +1,76 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Currumbin Eagles Old Boys Admin</title><style>body{margin:0;font:17px/1.6 Arial,sans-serif;background:#f3f4f5;color:#222}iframe{display:block;width:100%;height:100dvh;border:0}.setup{max-width:600px;margin:12vh auto;padding:30px;background:white;border-top:5px solid #b9162d}h1{line-height:1.15}</style></head><body><main id="app"><section class="setup"><h1>Club admin</h1><p>Admin access is awaiting connection to the club's Apps Script backend.</p></section></main><script src="config.js"></script><script>if(window.RAFFLE_WEB_APP_URL){const f=document.createElement("iframe");f.setAttribute("credentialless","");f.src=window.RAFFLE_WEB_APP_URL+"?view=admin";f.title="Private raffle administration";document.getElementById("app").replaceChildren(f);}</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Currumbin Eagles Old Boys Admin</title>
+  <link rel="icon" href="./favicon.ico?v=2" sizes="any">
+  <style>
+    body{margin:0;background:#f3f4f5;color:#202124;font:16px/1.45 Arial,sans-serif}
+    [hidden]{display:none!important}
+    iframe{display:block;width:100%;height:100vh;height:100dvh;border:0}
+    .loading{min-height:100vh;min-height:100dvh;display:grid;place-items:center;box-sizing:border-box;padding:24px}
+    .brand{width:min(100%,380px);text-align:center;background:#202124;color:#fff;border-radius:12px;overflow:hidden}
+    .brand-inner{padding:24px 18px 18px}
+    .brand img{width:48px;height:48px}
+    .club{margin-top:8px;font-size:clamp(16px,5vw,23px);font-weight:800;font-style:italic}
+    h1{margin:0;font-size:clamp(33px,9vw,50px);line-height:1.06;font-weight:900;font-style:italic}
+    .status{margin:0;background:#bd081d;padding:12px 16px;color:#fff}
+    .retry{display:inline-block;margin-top:10px;color:#fff;font-weight:bold}
+  </style>
+  <script src="config.js"></script>
+</head>
+<body>
+  <main id="loading" class="loading">
+    <div class="brand">
+      <div class="brand-inner">
+        <img src="./favicon.ico?v=2" alt="">
+        <div class="club">CURRUMBIN EAGLES</div>
+        <h1>OLD BOYS</h1>
+      </div>
+      <div class="status">
+        <p id="status" role="status" style="margin:0">Loading staff sign-in…</p>
+        <a class="retry" id="retry" href="./admin.html" hidden>Try again</a>
+      </div>
+    </div>
+  </main>
+  <div id="staffApp"></div>
+  <script>
+    const loader = document.getElementById('loading');
+    const status = document.getElementById('status');
+    if (window.RAFFLE_WEB_APP_URL) {
+      const frame = document.createElement('iframe');
+      frame.setAttribute('credentialless', '');
+      frame.title = 'Private raffle administration';
+      frame.hidden = true;
+
+      const timeout = window.setTimeout(() => {
+        status.textContent = 'Staff sign-in is taking longer than expected.';
+        document.getElementById('retry').hidden = false;
+      }, 12000);
+
+      function onStaffReady(event) {
+        const googleFrame = /^https:\/\/(?:script\.google\.com|[a-z0-9-]+-script\.googleusercontent\.com)$/.test(event.origin);
+        if (!googleFrame || event.data !== 'eagles-raffle-staff-ready') return;
+        let sender = event.source;
+        while (sender && sender !== window && sender !== frame.contentWindow) {
+          const parent = sender.parent;
+          if (parent === sender) return;
+          sender = parent;
+        }
+        if (sender !== frame.contentWindow) return;
+        window.removeEventListener('message', onStaffReady);
+        window.clearTimeout(timeout);
+        loader.hidden = true;
+        frame.hidden = false;
+      }
+
+      window.addEventListener('message', onStaffReady);
+      frame.src = window.RAFFLE_WEB_APP_URL + '?view=admin';
+      document.getElementById('staffApp').append(frame);
+    } else {
+      status.textContent = 'Staff sign-in is currently unavailable.';
+    }
+  </script>
+</body>
+</html>
